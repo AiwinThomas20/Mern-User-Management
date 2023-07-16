@@ -29,7 +29,7 @@ const updateUser = async (req, res) => {
 
     await user.save();
 
-    res.status(200).json({ message: "User details updated successfully" });
+    res.status(200).json({ user });
   } else {
     res.status(404).json({ message: "User not found" });
   }

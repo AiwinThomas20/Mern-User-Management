@@ -37,13 +37,17 @@ function AdminHome() {
   const userDelete = (id) => {
     axios.delete(BASE_URL + ADMIN_URL + "remove/" + id).then(() => {
       axios.get(BASE_URL + ADMIN_URL).then((response) => {
-        setUsers(response.data.users);
+        console.log(response.data.users);
+        setfilteredUser(response.data.users);
         navigate("/admin");
       });
     });
   };
 
   const userEdit = (id) => {
+    const user = users.find((user) => user._id === id);
+    setEditedName(user.name);
+    setEditedEmail(user.email);
     setEditingId(id);
   };
 
@@ -60,10 +64,10 @@ function AdminHome() {
       name: editedName,
       email: editedEmail,
     };
-    console.log(userData);
-    axios.put(BASE_URL + ADMIN_URL + id, userData).then((response) => {
-      setUsers(response.data.users);
-      navigate("/admin");
+    axios.put(BASE_URL + ADMIN_URL + id, userData).then(() => {
+      axios.get(BASE_URL + ADMIN_URL).then((response) => {
+        setfilteredUser(response.data.users);
+      });
     });
   };
 

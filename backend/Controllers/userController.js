@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const cloudinary = require("../Utils/cloudinary");
 const asynchandler = require("express-async-handler");
 const User = require("../Models/userModel");
 
@@ -31,6 +32,7 @@ const registerUser = asynchandler(async (req, res) => {
       name: user.name,
       email: user.email,
       token: generatetoken(user._id),
+      profilePic: user.profilePic,
     });
   } else {
     res.status(400);
@@ -47,9 +49,10 @@ const loginUser = asynchandler(async (req, res) => {
       name: user.name,
       email: user.email,
       token: generatetoken(user._id),
+      profilePic: user.profilePic,
     });
   } else {
-    res.status(400);
+    res.status(402);
     throw new Error("Invalid Credentials");
   }
   res.json({ messaage: "Login User" });
@@ -64,7 +67,24 @@ const getMe = asynchandler(async (req, res) => {
   });
 });
 
-const uploadPic = asynchandler((req, res) => {});
+const uploadPic = asynchandler(async (req, res) => {
+  // console.log("this is req.body :", req)
+  let result = await cloudinary.uploader.upload(req.file.path);
+  if (result.url) {
+    const user = await User.findById(req.params.id);
+    user.profilePic = result.url;
+    await user.save();
+    res.json({
+      _id: user.id,
+      name: user.name,
+      email: user.email,
+      token: generatetoken(user._id),
+      profilePic: user.profilePic,
+    });
+  } else {
+    console.log("image upload failed");
+  }
+});
 
 const generatetoken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {

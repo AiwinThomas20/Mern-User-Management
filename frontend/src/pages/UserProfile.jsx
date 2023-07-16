@@ -1,20 +1,46 @@
 import { useSelector } from "react-redux";
 import Header from "../Components/Header";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { BASE_URL } from "../api/apiUrls";
 
 function UserProfile() {
   const { user } = useSelector((state) => state.auth);
+  const [userData, setUserData] = useState(user);
 
-  const changePic = () => {};
+  console.log(user);
+  const [profilePic, setProfilePic] = useState("");
+
+  useEffect(() => {
+    setProfilePic(user.profilePic);
+  }, [profilePic]);
+
+  const handleFileChange = (event) => {
+    let image = event.target.files[0];
+
+    const formData = new FormData();
+    formData.append("image", image);
+
+    axios
+      .post(
+        "http://localhost:5000/api/users/imageUpload/" + userData._id,
+        formData
+      )
+      .then((response) => {
+        console.log(response.data);
+        setUserData(response.data);
+      })
+      .catch((error) => {
+        console.log("catchedd error");
+      });
+  };
 
   return (
     <>
       <Header />
       <section className="heading">
         <img
-          src={
-            user?.profilePic ||
-            "https://img.freepik.com/free-icon/user_318-159711.jpg"
-          }
+          src={userData.profilePic}
           alt="Profile-Pic"
           width="200"
           height="200"
@@ -29,7 +55,7 @@ function UserProfile() {
             className="form-control"
             id="name"
             name="name"
-            value={user && user.name}
+            value={userData && userData.name}
           />
         </div>
         <div className="form-group">
@@ -38,13 +64,11 @@ function UserProfile() {
             className="form-control"
             id="email"
             name="email"
-            value={user && user.email}
+            value={userData && userData.email}
           />
         </div>
         <div className="form-group">
-          <button type="submit" className="btn btn-block" onClick={changePic}>
-            Change Photo
-          </button>
+          <input type="file" name="image" onChange={handleFileChange} />
         </div>
       </section>
     </>
